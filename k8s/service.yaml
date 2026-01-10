@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-game-svc
+  labels:
+    app: game-app
+spec:
+  type: LoadBalancer
+  selector:
+    app: game-app
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+      name: containerport

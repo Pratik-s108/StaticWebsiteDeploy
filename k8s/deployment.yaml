@@ -2,12 +2,12 @@ apiVersion: app/v1
 kind: Deployment
 metadata:
   name: my-game-deploy
-  label:
+  labels:
     app: game-app
 spec: 
   selector:
     matchlabels:
-      app: game
+      app: game-app
   replicas: 4
   template:
     metadata:
@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: nginx-container
-          image: nginx:latest
+          image: game-img:latest
           ports:
             - containerPort: 80
           resources:

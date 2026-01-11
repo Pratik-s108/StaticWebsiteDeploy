@@ -1,4 +1,4 @@
-apiVersion: app/v1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: my-game-deploy
@@ -6,13 +6,13 @@ metadata:
     app: game-app
 spec: 
   selector:
-    matchlabels:
+    matchLabels:
       app: game-app
   replicas: 4
   template:
     metadata:
       name: my-game-pod
-      label:
+      labels:
         app: game-app
     spec:
       containers:
@@ -23,10 +23,10 @@ spec:
           resources:
             requests:
               cpu: 200m
-              memory: 100M
+              memory: 100Mi
             limits:
               cpu: 500m
-              memory: 200M
+              memory: 200Mi
 
 
 

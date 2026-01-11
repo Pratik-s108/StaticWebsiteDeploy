@@ -1,5 +1,5 @@
 pipeline{
-    agent any
+    agent { label = "my-agent" }
     
     stages{
         stage("Code Clone"){
@@ -8,10 +8,10 @@ pipeline{
                 git url: "https://github.com/Pratik-s108/Tic-Tac-Toe.git", branch: "newjs_script"
             }
         }
-        stage("Code Build & Test"){
+        stage("Code Build"){
             steps{
                 echo "Code Build Stage"
-                sh "docker build -t tictactoe ."
+                sh "docker build -t pratiklanjewar4198040/game-img ."
             }
         }
         stage("Push To DockerHub"){
@@ -21,14 +21,23 @@ pipeline{
                     usernameVariable:"dockerHubUser", 
                     passwordVariable:"dockerHubPass")]){
                 sh 'echo $dockerHubPass | docker login -u $dockerHubUser --password-stdin'
-                sh "docker tag tictactoe:latest pratiklanjewar4198040/tictactoe:latest"
-                sh "docker push pratiklanjewar4198040/tictactoe:latest"
+                sh "docker push pratiklanjewar4198040/game-img:latest"
                 }
             }
         }
+	stage("Infrastructure"){
+	    steps{
+		sh '''cd terraform/
+			terraform init
+			terraform plan
+			terraform apply --auto-approve
+		'''
+	    }
+	}
         stage("Deploy"){
             steps{
-                sh "docker compose down && docker compose up -d "
+                sh '''aws eks update-kubeconfig --name My-cluster --region ap-south-1
+			kubectl apply -f k8s/'''
             }
         }
     }

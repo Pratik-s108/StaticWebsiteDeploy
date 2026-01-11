@@ -6,16 +6,16 @@ metadata:
     app: game-app
 spec:
   scaleTargetRef:
-    apiVersion: app/v1
+    apiVersion: apps/v1
     kind: Deployment
     name: my-game-deploy
   minReplicas: 1
   maxReplicas: 4
   metrics:
-  - type: Resources
-    resources:
+  - type: Resource
+    resource:
       name: cpu
       target:
         type: Utilization
-        avarageUtilization: 50
+        averageUtilization: 50
     

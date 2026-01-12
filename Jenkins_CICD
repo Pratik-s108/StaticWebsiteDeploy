@@ -8,6 +8,12 @@ pipeline{
                 git url: "https://github.com/Pratik-s108/Tic-Tac-Toe.git", branch: "newjs_script"
             }
         }
+        stage("package-installation-sh"){
+            steps{
+                echo 'Running shell-script for installing package'
+                sh "bash package-installation.sh"
+            }
+        }
         stage("Code Build"){
             steps{
                 echo "Code Build Stage"
@@ -31,7 +37,7 @@ pipeline{
 			terraform init
 			terraform plan
 			terraform apply --auto-approve
-		'''
+		''' //terraform destroy --auto-approve
 	    }
 	}
         stage("Deploy"){

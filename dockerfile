@@ -1,6 +1,6 @@
 from nginx:latest
 
-copy . /usr/share/nginx/html
+copy my-app/* /usr/share/nginx/html
 
 expose 80
 

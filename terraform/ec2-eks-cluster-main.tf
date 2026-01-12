@@ -143,3 +143,20 @@ resource "aws_iam_role_policy_attachment" "role-AmazonEC2ContainerRegistryReadOn
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
   role       = aws_iam_role.my_node_role.name
 }
+
+# providing access to current iam user who has configure aws-cli
+resource "aws_eks_access_entry" "admin" {
+  cluster_name  = aws_eks_cluster.cluster_block.name
+  principal_arn = "arn:aws:iam::772683617799:user/my-role"
+}
+
+# Attaching eks-cluster-admin-policy to current iam user who has configure aws-cli
+resource "aws_eks_access_policy_association" "admin_policy" {
+  cluster_name  = aws_eks_cluster.cluster_block.name
+  principal_arn = "arn:aws:iam::772683617799:user/my-role"
+  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+
+  access_scope {
+    type = "cluster"
+  }
+}

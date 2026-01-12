@@ -1,8 +1,3 @@
-provider "aws" {
-    region = "ap-south-1"
-}
-
-
 # Eks-cluster
 resource "aws_eks_cluster" "cluster_block" {
   name = "My-cluster"

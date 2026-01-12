@@ -1,5 +1,7 @@
 pipeline{
-    agent { label = "my-agent" }
+    agent { 
+        label "my-agent" 
+    }
     
     stages{
         stage("Code Clone"){
@@ -17,7 +19,8 @@ pipeline{
         stage("Code Build"){
             steps{
                 echo "Code Build Stage"
-                sh "docker build -t pratiklanjewar4198040/game-img ."
+                sh '''sudo chown ubuntu /var/run/docker.sock
+                      docker build -t pratiklanjewar4198040/game-img .'''
             }
         }
         stage("Push To DockerHub"){

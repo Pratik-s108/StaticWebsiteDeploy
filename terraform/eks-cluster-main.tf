@@ -1,0 +1,162 @@
+provider "aws" {
+    region = "ap-south-1"
+}
+
+resource "aws_instance" "instance-block"{
+    ami = "ami-02b8269d5e85954ef"
+    instance_type = "m7i-flex.large"
+    key_name = "jenkins-key"
+    tags = {
+        Name = "Static-website/jenkins-master"
+        name = "created-with-terraform"
+    }
+}
+
+resource "aws_instance" "instance-block-2" {
+    ami = "ami-02b8269d5e85954ef"
+    instance_type = "m7i-flex.large"
+    key_name = "jenkins-key"
+    tags = {
+        Name = "Jenkins-slave"
+        name = "created-with-terraform"
+    }
+}
+
+# Eks-cluster
+resource "aws_eks_cluster" "cluster_block" {
+  name = "My-cluster"
+
+  access_config {
+    authentication_mode = "API"
+  }
+
+  role_arn = aws_iam_role.my_role.arn
+  version  = "1.34"
+
+  vpc_config {
+    subnet_ids = data.aws_subnets.default_subnets.ids #subnet ids from data block
+  }
+
+  # Ensure that IAM Role permissions are created before and deleted
+  # after EKS Cluster handling. Otherwise, EKS will not be able to
+  # properly delete EKS managed EC2 infrastructure such as Security Groups.
+  depends_on = [
+    aws_iam_role_policy_attachment.cluster-role_AmazonEKSClusterPolicy, 
+  ]
+}
+
+# using existing vpc (default)  
+data "aws_vpc" "my_vpc" {
+  default = true
+}
+# using default subnets (default)
+data "aws_subnets" "default_subnets" {
+  filter {
+    name = "vpc-id"
+    values = [data.aws_vpc.my_vpc.id] # gettting subnets from default vpc
+  }
+}
+
+# Role for eks-cluster
+resource "aws_iam_role" "my_role" {
+  name = "cluster-role"
+  assume_role_policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Principal": {
+                "Service": [
+                    "eks.amazonaws.com"
+                ]
+            },
+            "Action": "sts:AssumeRole"
+        }
+    ]
+  })
+}
+# arn policy attach to eks-cluster-role
+resource "aws_iam_role_policy_attachment" "cluster-role_AmazonEKSClusterPolicy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+  role       = aws_iam_role.my_role.name
+}
+
+
+# Node-group 
+resource "aws_eks_node_group" "node_grp" {
+  cluster_name    = aws_eks_cluster.cluster_block.name
+  node_group_name = "my-node"
+  node_role_arn   = aws_iam_role.my_node_role.arn
+  subnet_ids      = data.aws_subnets.default_subnets.ids
+  instance_types = [ "m7i-flex.large" ]
+
+  scaling_config {
+    desired_size = 1
+    max_size     = 2
+    min_size     = 1
+  }
+
+  update_config {
+    max_unavailable = 1
+  }
+
+  # Ensure that IAM Role permissions are created before and deleted after EKS Node Group handling.
+  # Otherwise, EKS will not be able to properly delete EC2 Instances and Elastic Network Interfaces.
+  depends_on = [
+    aws_iam_role_policy_attachment.role-AmazonEKSWorkerNodePolicy,
+    aws_iam_role_policy_attachment.role-AmazonEKS_CNI_Policy,
+    aws_iam_role_policy_attachment.role-AmazonEC2ContainerRegistryReadOnly,
+  ]
+}
+
+# Role for node-group
+resource "aws_iam_role" "my_node_role" {
+  name = "node-role"
+  assume_role_policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "sts:AssumeRole"
+            ],
+            "Principal": {
+                "Service": [
+                    "ec2.amazonaws.com"
+                ]
+            }
+        }
+    ]
+  })
+}
+
+# arn policy attach to node-group role
+resource "aws_iam_role_policy_attachment" "role-AmazonEKSWorkerNodePolicy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+  role       = aws_iam_role.my_node_role.name
+}
+resource "aws_iam_role_policy_attachment" "role-AmazonEKS_CNI_Policy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+  role       = aws_iam_role.my_node_role.name
+}
+resource "aws_iam_role_policy_attachment" "role-AmazonEC2ContainerRegistryReadOnly" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+  role       = aws_iam_role.my_node_role.name
+}
+
+# providing access to current iam user who has configure aws-cli
+resource "aws_eks_access_entry" "admin" {
+  cluster_name  = aws_eks_cluster.cluster_block.name
+  principal_arn = "arn:aws:iam::772683617799:user/my-role"
+}
+
+# Attaching eks-cluster-admin-policy to current iam user who has configure aws-cli
+resource "aws_eks_access_policy_association" "admin_policy" {
+  cluster_name  = aws_eks_cluster.cluster_block.name
+  principal_arn = "arn:aws:iam::772683617799:user/my-role"
+  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+
+  access_scope {
+    type = "cluster"
+  }
+}

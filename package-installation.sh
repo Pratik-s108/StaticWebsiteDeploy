@@ -23,3 +23,4 @@ sudo mv kubectl /usr/local/bin/
 
 # java-17 installation
 sudo apt install openjdk-17-jdk -y
+#on

@@ -50,7 +50,8 @@ pipeline{
     }
 	stage("Infrastructure"){
 	    steps{
-            sh '''cd terraform/
+            sh '''export AWS_DEFAULT_REGION=ap-south-1
+                cd terraform/
                 terraform init
                 terraform plan
                 terraform apply --auto-approve
@@ -59,7 +60,8 @@ pipeline{
 	}
         stage("Deploy"){
             steps{
-                sh '''aws eks update-kubeconfig --name My-cluster --region ap-south-1
+                sh '''export AWS_DEFAULT_REGION=ap-south-1
+                aws eks update-kubeconfig --name My-cluster --region ap-south-1
 			kubectl apply -f k8s/'''
             }
         }

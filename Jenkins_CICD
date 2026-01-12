@@ -31,13 +31,27 @@ pipeline{
                 }
             }
         }
+    stage('AWS CLI Check') {
+        steps {
+            withCredentials([usernamePassword(
+                credentialsId: 'awscli_ID',
+                usernameVariable: 'AWS_ACCESS_KEY_ID',
+                passwordVariable: 'AWS_SECRET_ACCESS_KEY'
+            )]) {
+                sh '''
+                export AWS_DEFAULT_REGION=ap-south-1
+                aws sts get-caller-identity
+                '''
+            }
+        }
+    }
 	stage("Infrastructure"){
 	    steps{
-		sh '''cd terraform/
-			terraform init
-			terraform plan
-			terraform apply --auto-approve
-		''' //terraform destroy --auto-approve
+            sh '''cd terraform/
+                terraform init
+                terraform plan
+                terraform apply --auto-approve
+            ''' //terraform destroy --auto-approve
 	    }
 	}
         stage("Deploy"){

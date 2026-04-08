@@ -23,7 +23,7 @@ The `main` branch focuses on DevOps setup and infrastructure
 ---
 
 ## 📂 Project Structure (New_script.js Branch)
-
+```bash
 .
 ├── k8s/  
 │   ├── deployment.yaml  
@@ -47,7 +47,7 @@ The `main` branch focuses on DevOps setup and infrastructure
 ├── Jenkins_CICD 
 ├── dockerfile
 └── docker-compose.yml   
-
+```
 ---
 
 ## 🚀 Project Overview
@@ -67,21 +67,24 @@ This project demonstrates a complete DevOps lifecycle:
 All Requried Tools, Packages will be installed Through ShellScripting ( Manually, For automation Jenkins CI/CD has all Setup)
 
 ### Commands
-- chmod +x package-installation.sh  
-- ./package-installation.sh  
-
+```bash
+chmod +x package-installation.sh  
+```
+```bash
+./package-installation.sh  
+```
 ---
 
 ## 🐳 Docker Setup
 
 ### Build Image:
-
-* docker build -t game-img:latest .
-
+```bash
+docker build -t game-img:latest .
+```
 ### Run Container:
-
-* docker run -d -p 80:80 --name game-container game-img:latest
-
+```bash
+docker run -d -p 80:80 --name game-container game-img:latest
+```
 ### Access the app:
 
 * http://<Public_IP>:<Port>
@@ -89,36 +92,59 @@ All Requried Tools, Packages will be installed Through ShellScripting ( Manually
 ---
 
 ## ⚙️ Docker Compose (Optional)
-
-* docker-compose up -d
-
+```bash
+docker-compose up -d
+```
 ### Access the app:
 
-* * http://<Public_IP>:<Port>
+* http://<Public_IP>:<Port>
 
 ---
 
 ## ☁️ Terraform Setup
 
 Create Infrastructure For Deployment Of AWS EKS(Kubernetes) and EC2 instance(Jenkins)
-
-* cd terraform  
-* terraform init  
-* terraform apply  
-
+```bash
+cd terraform  
+terraform init  
+```
+```bash
+terraform plan   
+```
+```bash 
+terraform apply  
+```
 ---
 
 ## ☸️ Kubernetes Deployment
 
 Use K8s For Deployment For Cost-Optimization
 
-kubectl apply -f used/
-
+### Command For Run Pods
+```bash
+kubectl apply -f .
+```
 ---
 
 ## 🔄 CI/CD with Jenkins
 
-Jenkins For Automate all the process, pipeline file is included to automate:
+### Installation
+
+Create EKS-cluster on AWS.
+```bash
+aws eks --region <region> update-kubeconfig --name <cluster-name>
+```
+
+Install kubectl in ububtu server:
+
+```bash
+curl -O https://s3.us-west-2.amazonaws.com/amazon-eks/1.34.2/2025-11-13/bin/linux/amd64/kubectl
+chmod +x ./kubectl
+mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$HOME/bin:$PATH
+echo 'export PATH=$HOME/bin:$PATH' >> ~/.bashrc
+```
+                          
+### Jenkins For Automate all the process, pipeline file is included to automate:
 
 - Clone Project Stage
 - Installing Packages Stage
